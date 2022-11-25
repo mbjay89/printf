@@ -1,40 +1,87 @@
 #include "main.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
+
 /**
-  *_printf - funciton that mimics printf from stdio, that 
-  * prints a string to stdout
-  *@format: string passed with specifiers
-  *@...: variadic parameters
-  *
-  *Return: length of string
+  *check_format - checks if there is a valid format specifier
+  * @format: possible valid format specifier
+  * Return: pointer to valid function or NULL
+  */
+int (*check_format(const char *format))(va_list)
+{
+	int i = 0;
+	print_t p[] = {
+		{"c", print_c},
+		{"s", print_s},
+		{NULL, NULL}
+	};
+
+	for (; p[i].t != NULL; i++)
+	{
+		if (*(p[i].t) == *format)
+			break;
+	}
+	return (p[i].f);
+}
+
+/**
+  * _printf - function for format printing
+  * @format: list of arguments to printing
+  * Return: Number of characters to printing
   */
 int _printf(const char *format, ...)
 {
-	int i, in_length = 0;
-	va_list arg_list;
+	va_list ap;
+	int (*f)(va_list);
+	unsigned int i = 0, counter = 0;
 
-	va_start(arg_list, format)
 	if (format == NULL)
 		return (-1);
-	for (i = 0; format[i] != '\0'; i++)
+
+	va_start(ap, format);
+	while (format && format[i])
 	{
-		if (format[i] == '%')
+		if (format[i] != '%')
 		{
-		if (format[i + 1] == 'c' || format[i + 1] == 's' ||
-		format[i + 1] == 'r' || format[i + 1] == 'R' || format[i + 1] == '%')
-			in_length = switch_char(arg_list, format[i + 1], in_length);
-		else if (format[i + 1] != '\0')
-			in_length = switch_num(arg_list, format[i + 1], in_length);
-		i++;
+			_putchar(format[i]);
+			counter++;
+			i++;
+			continue;
 		}
-	else
-	{
-		_putchar(format[i]);
-		in_length++;
+		else
+		{
+			if (format[i + 1] == '%')
+			{
+				_putchar('%');
+				counter++;
+				i += 2;
+				continue;
+			}
+			else
+			{
+				f = check_format(&format[i + 1]);
+				if (f == NULL)
+					return (-1);
+				i += 2;
+				counter += f(ap);
+				continue;
+			}
+		}
+		i++;
 	}
-	}
-	va_end(arg_list);
-	return (in_length);
+	va_end(ap);
+	return (counter);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
