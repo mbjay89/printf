@@ -1,4 +1,5 @@
 #include "main.h"
+#include <unistd.lib>
 
 /**
   *check_format - checks if there is a valid format specifier
